@@ -1,5 +1,7 @@
 import pygame
 import random
+import winsound
+import threading
 
 # Inicialização do pygame
 pygame.init()
@@ -11,12 +13,17 @@ GRID_HEIGHT = 15
 SCREEN_WIDTH = CELL_SIZE * GRID_WIDTH
 SCREEN_HEIGHT = CELL_SIZE * GRID_HEIGHT
 SNAKE_SPEED = 10
+SPEED_INCREASE_FACTOR = 1.1  # Fator de aumento de velocidade
 
 # Cores
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
+
+# Sons
+APPLE_SOUND_FREQUENCY = 800  # Frequência do som da maçã
+APPLE_SOUND_DURATION = 200  # Duração do som da maçã
 
 # Inicialização da tela
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -63,8 +70,14 @@ class Food:
     def set_food_off_screen(self):
         self.is_food_on_screen = False
 
+# Função para reproduzir o som da maçã em paralelo com o jogo
+def play_apple_sound():
+    winsound.Beep(APPLE_SOUND_FREQUENCY, APPLE_SOUND_DURATION)
+
 # Função principal
 def main():
+    global SNAKE_SPEED  # Declare a variável como global para acessá-la dentro da função
+    
     clock = pygame.time.Clock()
     snake = Snake()
     food = Food()
@@ -90,6 +103,8 @@ def main():
             snake.update(True)
             food.set_food_off_screen()
             score += 1
+            threading.Thread(target=play_apple_sound).start()  # Reproduzir o som da maçã em uma thread paralela
+            SNAKE_SPEED *= SPEED_INCREASE_FACTOR  # Aumentar a velocidade da cobra
         
         if snake.collide_with_boundaries() or snake.collide_with_self():
             pygame.quit()
